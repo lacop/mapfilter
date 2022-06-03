@@ -36,7 +36,7 @@ pub struct Cli {
     // - name regex
     // - tag string + string, direct match
     // - tag regex + regex
-    // TODO:
     // - tag fancyregex + fancyregex?
+    // TODO:
     // - lat lon (distance from point?)
 }

@@ -1,5 +1,6 @@
 use clap::Parser;
 use color_eyre::eyre::{eyre, Result};
+use console::Term;
 use osmpbf::ElementReader;
 
 use std::sync::mpsc::sync_channel;
@@ -33,8 +34,10 @@ fn main() -> Result<()> {
 
     let consumer_thread = thread::spawn(move || {
         let mut count = 0;
+        let term = Term::stdout();
         for element in rx {
-            println!("{element:?}");
+            //println!("{element:?}");
+            element.print(&term).expect("Priting failed");
             count += 1;
             if count > args.max_results {
                 // TODO print warning we missed some results?

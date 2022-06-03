@@ -10,6 +10,7 @@ clap =  { version = "3.1", features = ["cargo", "derive"] }
 
 # Fancy progress bars, color output and number printing.
 console = "0.15"
+ellipse = "0.2"
 indicatif = "0.16"
 thousands = "0.2"
 

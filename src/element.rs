@@ -1,3 +1,6 @@
+use color_eyre::eyre::Result;
+use console::{style, Term};
+use ellipse::Ellipse;
 use osmpbf::Element;
 use std::collections::BTreeMap;
 
@@ -44,5 +47,39 @@ impl<'a> From<Element<'a>> for OwnedElement {
             tags: element_tags(&element),
             lat_lon: element_lat_lon(&element),
         }
+    }
+}
+
+impl OwnedElement {
+    pub fn print(&self, term: &Term) -> Result<()> {
+        term.write_line(&format!(
+            "┏ {}",
+            style(self.get_name().unwrap_or("(unknown name)".to_string())).green(),
+        ))?;
+        term.write_line(&format!(
+            "┃  📍 {}",
+            style(&format!("http://openstreetmap.org/node/{}", self.id)).dim()
+        ))?;
+        if let Some((lat, lon)) = self.lat_lon {
+            term.write_line(&format!(
+                "┃  🌍 http://google.com/maps/search/{:.5}+{:.5}",
+                lat, lon
+            ))?;
+        }
+        // TODO 📏 distance from latlon
+        // TODO 🏷️ labels
+        term.write_line("┗━━━━")?;
+
+        Ok(())
+    }
+
+    // Return a suitable name, with limited length.
+    fn get_name(&self) -> Option<String> {
+        for (k, v) in &self.tags {
+            if k == "name" {
+                return Some(v.as_str().truncate_ellipse(50).to_string());
+            }
+        }
+        None
     }
 }
