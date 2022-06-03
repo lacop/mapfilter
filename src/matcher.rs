@@ -7,6 +7,7 @@ use regex::Regex;
 pub struct Matcher {
     name: Option<Regex>,
     tag_value: Vec<(String, String)>,
+    tag_regex: Vec<(Regex, Regex)>,
 }
 
 fn make_regex(pattern: &Option<String>) -> Result<Option<Regex>> {
@@ -60,6 +61,15 @@ impl Matcher {
                         .ok_or(eyre!("Must be key=value pair"))
                 })
                 .collect::<Result<Vec<_>>>()?,
+            tag_regex: args
+                .tag_regex
+                .iter()
+                .map(|kv| {
+                    kv.split_once('=')
+                        .ok_or(eyre!("Must be regex=regex pair"))
+                        .and_then(|(k, v)| Ok((Regex::new(k)?, Regex::new(v)?)))
+                })
+                .collect::<Result<Vec<_>>>()?,
         })
     }
 
@@ -86,6 +96,23 @@ impl Matcher {
             if !find_tag_match(element, |k, v| {
                 if k == expected_k {
                     if v == expected_v {
+                        TagMatch::FoundMatching
+                    } else {
+                        TagMatch::FoundMismatching
+                    }
+                } else {
+                    TagMatch::NotFound
+                }
+            }) {
+                return false;
+            }
+        }
+
+        // Regex=regex tags.
+        for (regex_k, regex_v) in &self.tag_regex {
+            if !find_tag_match(element, |k, v| {
+                if regex_k.is_match(k) {
+                    if regex_v.is_match(v) {
                         TagMatch::FoundMatching
                     } else {
                         TagMatch::FoundMismatching

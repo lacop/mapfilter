@@ -11,7 +11,7 @@ pub struct Cli {
 
     #[clap(
         short = 'm',
-        long,
+        long = "max",
         default_value_t = 100,
         help = "Max number of results to show"
     )]
@@ -22,11 +22,14 @@ pub struct Cli {
 
     #[clap(short = 't', long, help = "Filter by key=value tag")]
     pub tag_value: Vec<String>,
+
+    #[clap(short = 'r', long, help = "Filter by regex=regex tag")]
+    pub tag_regex: Vec<String>,
     // DONE
     // - name regex
     // - tag string + string, direct match
-    // TODO:
     // - tag regex + regex
+    // TODO:
     // - tag fancyregex + fancyregex?
     // - lat lon (distance from point?)
 }
