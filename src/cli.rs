@@ -25,6 +25,13 @@ pub struct Cli {
 
     #[clap(short = 'r', long, help = "Filter by regex=regex tag")]
     pub tag_regex: Vec<String>,
+
+    #[clap(
+        short = 'f',
+        long,
+        help = "Filter by regex=regex tag, using fancy-regex"
+    )]
+    pub tag_fancy_regex: Vec<String>,
     // DONE
     // - name regex
     // - tag string + string, direct match

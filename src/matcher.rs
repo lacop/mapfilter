@@ -8,6 +8,7 @@ pub struct Matcher {
     name: Option<Regex>,
     tag_value: Vec<(String, String)>,
     tag_regex: Vec<(Regex, Regex)>,
+    tag_fancy_regex: Vec<(fancy_regex::Regex, fancy_regex::Regex)>,
 }
 
 fn make_regex(pattern: &Option<String>) -> Result<Option<Regex>> {
@@ -70,6 +71,17 @@ impl Matcher {
                         .and_then(|(k, v)| Ok((Regex::new(k)?, Regex::new(v)?)))
                 })
                 .collect::<Result<Vec<_>>>()?,
+            tag_fancy_regex: args
+                .tag_fancy_regex
+                .iter()
+                .map(|kv| {
+                    kv.split_once('=')
+                        .ok_or(eyre!("Must be regex=regex pair"))
+                        .and_then(|(k, v)| {
+                            Ok((fancy_regex::Regex::new(k)?, fancy_regex::Regex::new(v)?))
+                        })
+                })
+                .collect::<Result<Vec<_>>>()?,
         })
     }
 
@@ -113,6 +125,23 @@ impl Matcher {
             if !find_tag_match(element, |k, v| {
                 if regex_k.is_match(k) {
                     if regex_v.is_match(v) {
+                        TagMatch::FoundMatching
+                    } else {
+                        TagMatch::FoundMismatching
+                    }
+                } else {
+                    TagMatch::NotFound
+                }
+            }) {
+                return false;
+            }
+        }
+
+        // Regex=regex tags, fancy regex.
+        for (regex_k, regex_v) in &self.tag_fancy_regex {
+            if !find_tag_match(element, |k, v| {
+                if regex_k.is_match(k).unwrap_or(false) {
+                    if regex_v.is_match(v).unwrap_or(false) {
                         TagMatch::FoundMatching
                     } else {
                         TagMatch::FoundMismatching
