@@ -1,8 +1,7 @@
 use clap::Parser;
 use color_eyre::eyre::{eyre, Result};
-use console::Term;
+use console::{style, Term};
 use osmpbf::ElementReader;
-
 use std::sync::mpsc::sync_channel;
 use std::thread;
 use thousands::Separable;
@@ -33,14 +32,18 @@ fn main() -> Result<()> {
     let (tx, rx) = sync_channel::<OwnedElement>(10);
 
     let consumer_thread = thread::spawn(move || {
-        let mut count = 0;
         let term = Term::stdout();
+        let mut count = 0;
         for element in rx {
-            //println!("{element:?}");
-            element.print(&term).expect("Priting failed");
             count += 1;
+            element.print(&term, count).expect("Priting failed");
             if count > args.max_results {
-                // TODO print warning we missed some results?
+                term.write_line(
+                    &style("✂️ Reached output limit, not showing more")
+                        .red()
+                        .to_string(),
+                )
+                .expect("Printing failed");
                 break;
             }
         }
@@ -61,13 +64,18 @@ fn main() -> Result<()> {
     )?;
     consumer_thread.join().map_err(|_| eyre!("Join failed"))?;
 
-    // TODO fancier printing
-    // TODO show excluded result count
-    println!(
-        "Results: {} / {}",
+    let term = Term::stdout();
+    term.write_line("")?;
+
+    term.write_line(&format!(
+        "{}: {} / {}: {} / {}: {}",
+        style("Total nodes").bold(),
+        total.separate_with_underscores(),
+        style("Filtered to").bold(),
         matches.separate_with_underscores(),
-        total.separate_with_underscores()
-    );
+        style("Displayed").bold(),
+        args.max_results.min(matches).separate_with_underscores()
+    ))?;
 
     Ok(())
 }

@@ -51,10 +51,13 @@ impl<'a> From<Element<'a>> for OwnedElement {
 }
 
 impl OwnedElement {
-    pub fn print(&self, term: &Term) -> Result<()> {
+    pub fn print(&self, term: &Term, index: u64) -> Result<()> {
         term.write_line(&format!(
-            "┏ {}",
-            style(self.get_name().unwrap_or("(unknown name)".to_string())).green(),
+            "┏ {} {}",
+            style(self.get_name().unwrap_or("(unknown name)".to_string()))
+                .green()
+                .bold(),
+            style(&format!("(#{index})")).dim()
         ))?;
         term.write_line(&format!(
             "┃  📍 {}",
