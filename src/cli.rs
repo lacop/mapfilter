@@ -32,11 +32,7 @@ pub struct Cli {
         help = "Filter by regex=regex tag, using fancy-regex"
     )]
     pub tag_fancy_regex: Vec<String>,
-    // DONE
-    // - name regex
-    // - tag string + string, direct match
-    // - tag regex + regex
-    // - tag fancyregex + fancyregex?
-    // TODO:
-    // - lat lon (distance from point?)
+
+    #[clap(short = 'l', long, help = "Filter by lat,lon,distance (in meters)")]
+    pub lat_lon_distance: Option<String>,
 }

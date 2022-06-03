@@ -1,5 +1,6 @@
-use crate::cli::Cli;
+use crate::{cli::Cli, element::element_lat_lon};
 use color_eyre::eyre::{eyre, Result, WrapErr};
+use geoutils::Location;
 use osmpbf::Element;
 use regex::Regex;
 
@@ -9,6 +10,7 @@ pub struct Matcher {
     tag_value: Vec<(String, String)>,
     tag_regex: Vec<(Regex, Regex)>,
     tag_fancy_regex: Vec<(fancy_regex::Regex, fancy_regex::Regex)>,
+    lat_lon_distance: Option<(f64, f64, f64)>,
 }
 
 fn make_regex(pattern: &Option<String>) -> Result<Option<Regex>> {
@@ -82,10 +84,38 @@ impl Matcher {
                         })
                 })
                 .collect::<Result<Vec<_>>>()?,
+            lat_lon_distance: args
+                .lat_lon_distance
+                .as_ref()
+                .map(|s| {
+                    let parts = s.split(',').collect::<Vec<_>>();
+                    if parts.len() != 3 {
+                        return Err(eyre!("Need three comma-separated values"));
+                    }
+                    Ok((parts[0].parse()?, parts[1].parse()?, parts[2].parse()?))
+                })
+                .transpose()?,
         })
     }
 
     pub fn matches(&self, element: &Element) -> bool {
+        // Distance.
+        if let Some((query_lat, query_lon, distance)) = self.lat_lon_distance {
+            if let Some((lat, lon)) = element_lat_lon(element) {
+                let element_location = Location::new(lat, lon);
+                let query_location = Location::new(query_lat, query_lon);
+                if element_location
+                    .haversine_distance_to(&query_location)
+                    .meters()
+                    > distance
+                {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        }
+
         // Name regex.
         if let Some(regex) = &self.name {
             if !find_tag_match(element, |k, v| {
