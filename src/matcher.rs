@@ -35,19 +35,22 @@ fn find_tag_match<FN>(element: &Element, mut f: FN) -> bool
 where
     FN: for<'a> FnMut(&'a str, &'a str) -> TagMatch,
 {
-    match element {
-        Element::DenseNode(dn) => {
-            for (k, v) in dn.tags() {
-                match f(k, v) {
-                    TagMatch::FoundMatching => return true,
-                    TagMatch::FoundMismatching => return false,
-                    TagMatch::NotFound => {}
-                }
-            }
+    // Probably could type-erase this somehow without allocation?
+    let iter: Box<dyn Iterator<Item = (&str, &str)>> = match element {
+        Element::Node(n) => Box::new(n.tags()),
+        Element::DenseNode(dn) => Box::new(dn.tags()),
+        Element::Way(w) => Box::new(w.tags()),
+        Element::Relation(r) => Box::new(r.tags()),
+    };
+
+    for (k, v) in iter {
+        match f(k, v) {
+            TagMatch::FoundMatching => return true,
+            TagMatch::FoundMismatching => return false,
+            TagMatch::NotFound => {}
         }
-        // TODO make this generic
-        _ => {}
     }
+
     false
 }
 
@@ -102,10 +105,10 @@ impl Matcher {
         // Distance.
         if let Some((query_lat, query_lon, distance)) = self.lat_lon_distance {
             if let Some((lat, lon)) = element_lat_lon(element) {
-                let element_location = Location::new(lat, lon);
-                let query_location = Location::new(query_lat, query_lon);
-                if element_location
-                    .haversine_distance_to(&query_location)
+                let location_element = Location::new(lat, lon);
+                let location_query = Location::new(query_lat, query_lon);
+                if location_element
+                    .haversine_distance_to(&location_query)
                     .meters()
                     > distance
                 {

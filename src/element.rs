@@ -13,8 +13,6 @@ pub struct OwnedElement {
     lat_lon: Option<(f64, f64)>,
 }
 
-// TODO implement fancy Display
-
 pub fn element_id(element: &Element) -> i64 {
     match element {
         Element::Node(n) => n.id(),
