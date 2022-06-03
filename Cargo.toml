@@ -1,0 +1,24 @@
+[package]
+name = "mapfilter"
+version = "0.1.0"
+authors = ["lacop <lacop@lacop.net>"]
+edition = "2021"
+
+[dependencies]
+# CLI flags.
+clap =  { version = "3.1", features = ["cargo", "derive"] }
+
+# Fancy progress bars, color output and number printing.
+console = "0.15"
+indicatif = "0.16"
+thousands = "0.2"
+
+# Error handling
+color-eyre = "0.5"
+
+# Reading OSM PBF files.
+osmpbf = "0.2"
+
+# Regex evaluation.
+regex = "1"
+fancy-regex = "0.10"
