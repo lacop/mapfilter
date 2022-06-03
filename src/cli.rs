@@ -35,4 +35,10 @@ pub struct Cli {
 
     #[clap(short = 'l', long, help = "Filter by lat,lon,distance (in meters)")]
     pub lat_lon_distance: Option<String>,
+
+    #[clap(
+        long,
+        default_value_t = String::from("^(name:.*|alt_name.*|old_name:.*|is_in:.*|wikidata|wikipedia|wikimedia.*|admin_level)$"),
+        help = "Regex which tag names to exclude from printing")]
+    pub hidden_tags: String,
 }

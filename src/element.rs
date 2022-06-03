@@ -3,6 +3,7 @@ use console::{style, Term};
 use ellipse::Ellipse;
 use geoutils::Location;
 use osmpbf::Element;
+use regex::Regex;
 use std::collections::BTreeMap;
 use thousands::Separable;
 
@@ -51,7 +52,13 @@ impl<'a> From<Element<'a>> for OwnedElement {
 }
 
 impl OwnedElement {
-    pub fn print(&self, term: &Term, index: u64, query_lat_lon: Option<(f64, f64)>) -> Result<()> {
+    pub fn print(
+        &self,
+        term: &Term,
+        index: u64,
+        query_lat_lon: Option<(f64, f64)>,
+        hidden_tags: &Regex,
+    ) -> Result<()> {
         let dim_bar = style("┃").dim();
         term.write_line(&format!(
             "{} {} {}",
@@ -84,7 +91,35 @@ impl OwnedElement {
             }
         }
 
-        // TODO 🏷️ labels
+        let mut first = true;
+        let mut line = String::new();
+        let print = |first: &mut bool, line: &mut String| -> Result<()> {
+            if line.is_empty() {
+                return Ok(());
+            }
+            if *first {
+                term.write_line(&format!("{}  🏷️ {}", dim_bar, line))?;
+            } else {
+                term.write_line(&format!("{}     {}", dim_bar, line))?;
+            }
+            *first = false;
+
+            line.clear();
+            Ok(())
+        };
+        for (k, v) in &self.tags {
+            if hidden_tags.is_match(k) {
+                continue;
+            }
+
+            let tag = format!("{}: {}  ", k, style(v).dim());
+            if line.len() + tag.len() >= 100 {
+                print(&mut first, &mut line)?;
+            }
+            line.push_str(&tag);
+        }
+        print(&mut first, &mut line)?;
+
         term.write_line(&style("┗━━━━").dim().to_string())?;
 
         Ok(())

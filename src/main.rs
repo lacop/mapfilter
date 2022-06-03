@@ -2,6 +2,7 @@ use clap::Parser;
 use color_eyre::eyre::{eyre, Result};
 use console::{style, Term};
 use osmpbf::ElementReader;
+use regex::Regex;
 use std::sync::mpsc::sync_channel;
 use std::thread;
 use thousands::Separable;
@@ -23,6 +24,9 @@ fn main() -> Result<()> {
         println!("{matcher:#?}");
     }
 
+    let hidden_tags = Regex::new(&args.hidden_tags)?;
+    let query_lat_lon = matcher.lat_lon_distance.map(|(lat, lon, _)| (lat, lon));
+
     println!("Using OSM PBF file from '{}'", args.map_file);
     let map_reader = ElementReader::from_path(args.map_file)?;
 
@@ -37,11 +41,7 @@ fn main() -> Result<()> {
         for element in rx {
             count += 1;
             element
-                .print(
-                    &term,
-                    count,
-                    matcher.lat_lon_distance.map(|(lat, lon, _)| (lat, lon)),
-                )
+                .print(&term, count, query_lat_lon, &hidden_tags)
                 .expect("Priting failed");
             if count > args.max_results {
                 term.write_line(
