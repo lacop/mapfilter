@@ -1,8 +1,10 @@
 use color_eyre::eyre::Result;
 use console::{style, Term};
 use ellipse::Ellipse;
+use geoutils::Location;
 use osmpbf::Element;
 use std::collections::BTreeMap;
+use thousands::Separable;
 
 #[derive(Debug)]
 pub struct OwnedElement {
@@ -51,27 +53,41 @@ impl<'a> From<Element<'a>> for OwnedElement {
 }
 
 impl OwnedElement {
-    pub fn print(&self, term: &Term, index: u64) -> Result<()> {
+    pub fn print(&self, term: &Term, index: u64, query_lat_lon: Option<(f64, f64)>) -> Result<()> {
+        let dim_bar = style("┃").dim();
         term.write_line(&format!(
-            "┏ {} {}",
+            "{} {} {}",
+            style("┏").dim(),
             style(self.get_name().unwrap_or("(unknown name)".to_string()))
                 .green()
                 .bold(),
             style(&format!("(#{index})")).dim()
         ))?;
         term.write_line(&format!(
-            "┃  📍 {}",
-            style(&format!("http://openstreetmap.org/node/{}", self.id)).dim()
+            "{}  📍 http://openstreetmap.org/node/{}",
+            dim_bar, self.id
         ))?;
         if let Some((lat, lon)) = self.lat_lon {
             term.write_line(&format!(
-                "┃  🌍 http://google.com/maps/search/{:.5}+{:.5}",
-                lat, lon
+                "{}  🌍 http://google.com/maps/search/{:.5}+{:.5}",
+                dim_bar, lat, lon
             ))?;
+            if let Some((query_lat, query_lon)) = query_lat_lon {
+                let location_element = Location::new(lat, lon);
+                let location_query = Location::new(query_lat, query_lon);
+                let distance = location_element
+                    .haversine_distance_to(&location_query)
+                    .meters();
+                term.write_line(&format!(
+                    "{}  📏 {} meters",
+                    dim_bar,
+                    (distance as u64).separate_with_underscores()
+                ))?;
+            }
         }
-        // TODO 📏 distance from latlon
+
         // TODO 🏷️ labels
-        term.write_line("┗━━━━")?;
+        term.write_line(&style("┗━━━━").dim().to_string())?;
 
         Ok(())
     }

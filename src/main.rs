@@ -36,7 +36,13 @@ fn main() -> Result<()> {
         let mut count = 0;
         for element in rx {
             count += 1;
-            element.print(&term, count).expect("Priting failed");
+            element
+                .print(
+                    &term,
+                    count,
+                    matcher.lat_lon_distance.map(|(lat, lon, _)| (lat, lon)),
+                )
+                .expect("Priting failed");
             if count > args.max_results {
                 term.write_line(
                     &style("✂️ Reached output limit, not showing more")

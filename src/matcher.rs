@@ -6,11 +6,11 @@ use regex::Regex;
 
 #[derive(Debug)]
 pub struct Matcher {
-    name: Option<Regex>,
-    tag_value: Vec<(String, String)>,
-    tag_regex: Vec<(Regex, Regex)>,
-    tag_fancy_regex: Vec<(fancy_regex::Regex, fancy_regex::Regex)>,
-    lat_lon_distance: Option<(f64, f64, f64)>,
+    pub name: Option<Regex>,
+    pub tag_value: Vec<(String, String)>,
+    pub tag_regex: Vec<(Regex, Regex)>,
+    pub tag_fancy_regex: Vec<(fancy_regex::Regex, fancy_regex::Regex)>,
+    pub lat_lon_distance: Option<(f64, f64, f64)>,
 }
 
 fn make_regex(pattern: &Option<String>) -> Result<Option<Regex>> {
