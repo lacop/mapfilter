@@ -8,7 +8,7 @@ Download `.osm.pbf` dump, for example from https://download.geofabrik.de/.
 
 ## Usage
 
-Run `mapfilter map.osm.pbf <filters>`.
+Run `mapfilter map.osm.pbf <filters>`. Use `mapfilter --help` for a full list of supported flags.
 
 ### Examples
 
