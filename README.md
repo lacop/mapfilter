@@ -6,6 +6,10 @@ CLI tool to run regex and location based filters on nodes from OpenStreetMap.
 
 Download `.osm.pbf` dump, for example from https://download.geofabrik.de/.
 
+## Installation
+
+You will need Rust (https://rustup.rs/). Then run `cargo install mapfilter`. Alternatively check out this repo and `cargo build --release`.
+
 ## Usage
 
 Run `mapfilter map.osm.pbf <filters>`. Use `mapfilter --help` for a full list of supported flags.
