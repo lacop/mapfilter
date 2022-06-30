@@ -100,3 +100,7 @@ $ mapfilter map.osm.pbf -m 5 -r "population=\d{6}" -l "52.5,-1.5,25000"
 
 Total nodes: 188_243_033 / Filtered to: 3 / Displayed: 3
 ```
+
+## License
+
+MIT
