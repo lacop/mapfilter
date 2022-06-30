@@ -63,9 +63,12 @@ impl OwnedElement {
         term.write_line(&format!(
             "{} {} {}",
             style("┏").dim(),
-            style(self.get_name().unwrap_or("(unknown name)".to_string()))
-                .green()
-                .bold(),
+            style(
+                self.get_name()
+                    .unwrap_or_else(|| "(unknown name)".to_string())
+            )
+            .green()
+            .bold(),
             style(&format!("(#{index})")).dim()
         ))?;
         term.write_line(&format!(
