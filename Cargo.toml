@@ -1,8 +1,15 @@
 [package]
 name = "mapfilter"
-version = "0.1.0"
+description="CLI tool to run regex and location based filters on nodes from OpenStreetMap"
 authors = ["lacop <lacop@lacop.net>"]
+license = "MIT"
 edition = "2021"
+version = "0.1.0"
+readme = "README.md"
+homepage = "https://github.com/lacop/mapfilter"
+repository = "https://github.com/lacop/mapfilter"
+keywords = ["cli", "search", "openstreetmap", "osm", "map"]
+categories = ["command-line-utilities"]
 
 [dependencies]
 # CLI flags.
